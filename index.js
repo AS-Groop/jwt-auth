@@ -1,23 +1,34 @@
-require('dotenv').config();
+import dotenv from 'dotenv'
+dotenv.config()
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import router from './routers/router.js';
+import mongoose from 'mongoose';
 
-const PORT = process.env.PORT || 3000;
+
+const PORT = process.env.PORT || 5000;
+
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-// app.use(cookieParser());
+app.use(cookieParser());
+app.use('/api',router);
+
 
 const start = async () => {
     try {
-        app.listen(PORT, (err)=>{
-            console.log(`Listening on ${PORT}`);
+        await mongoose.connect(process.env.DB_URL, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        })
+        app.listen(PORT, (err) => {
+            console.log(`Listening on port ${PORT}`);
         })
     } catch (e) {
-        console.log(e)
+
     }
 }
 
