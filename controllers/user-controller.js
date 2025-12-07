@@ -20,7 +20,14 @@ class UserController {
 
     async login(req, res, next) {
         try {
-
+            // const errors = validationResult(req);
+            // if (!errors.isEmpty()) {
+            //     return next(ApiError.BadRequest("Validatsiyada xatolik", errors.array()))
+            // }
+            const {email, password} = req.body;
+            const userData = await userServices.login(email, password);
+            res.cookie('refreshToken', userData.refreshToken, {maxAge: 15*24*60*60*1000, httpOnly: true});
+            return res.json(userData);
         } catch (e) {
             next(e)
         }
@@ -28,7 +35,10 @@ class UserController {
 
     async logout(req, res, next) {
         try {
-
+            const {refreshToken} = req.cookies;
+            const token = await userServices.logout(refreshToken);
+            res.clearCookie('refreshToken');
+            return res.json(token);
         } catch (e) {
             next(e)
         }
@@ -48,7 +58,10 @@ class UserController {
 
     async refresh(req, res, next) {
         try {
-
+            const {refreshToken} = req.cookies;
+            const userData = await userServices.refresh(refreshToken);
+            res.cookie('refreshToken', userData.refreshToken, {maxAge: 15*24*60*60*1000, httpOnly: true});
+            return res.json(userData);
         } catch (e) {
             next(e)
         }
@@ -56,7 +69,8 @@ class UserController {
 
     async getAllUsers(req, res, next) {
         try {
-            res.json(['212','213']);
+            const users = await userServices.getAllUsers()
+            return res.json(users);
         } catch (e) {
             next(e)
         }
