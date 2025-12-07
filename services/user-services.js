@@ -5,13 +5,14 @@ import mailServices from "./mail-services.js";
 import tokenServices from "./token-services.js";
 import UserDto from "../dtos/user-dto.js";
 import userModel from "../models/user-model.js";
+import ApiError from "../exceptions/api-error.js";
 
 
 class UserServices {
     async registration(email, password) {
         const candidate = await UserModel.findOne({email});
         if (candidate) {
-            throw new Error("User is already registered");
+            throw ApiError.BadRequest("User is already registered");
         }
         const activationLink = uuid.v4()
         const passwordHash = await bcrypt.hash(password, 3);
@@ -30,7 +31,7 @@ class UserServices {
     async activate(activationLink) {
         const user = await userModel.findOne({activationLink});
         if (!user) {
-            throw new Error(`No togri link! ${activationLink}`);
+            throw ApiError.BadRequest(`No togri link! ${activationLink}`);
         }
         user.isActivated = true
         await user.save()
